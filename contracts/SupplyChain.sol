@@ -145,6 +145,7 @@ contract SupplyChain {
     }
   // Create a function named 'withdrawFunds' that allows the contract owner to withdraw all the available funds.
     function withdrawFunds() onlyOwner public payable {
+	// I can't understand your direction for this function. So, I implemented the function for transfer to owner all price...
         uint funds;
         for(uint _id = 0; _id <itemIdCount;_id++) {
             funds = items[_id].price;
