@@ -27,6 +27,7 @@ contract SupplyChain {
         address payable seller;
         address payable buyer;
     }
+
   // Create a variable named 'items' to map itemIds to Items.
     mapping(uint => Item) items;
     
@@ -76,16 +77,16 @@ contract SupplyChain {
         newItem.seller = msg.sender;
         newItem.buyer = address(0);
         
-        overpayment = msg.value - PAY_FEE;
-        
         id = itemIdCount;
         items[id] = newItem;
         itemIdCount = itemIdCount + 1;
-        
+
+        overpayment = msg.value - PAY_FEE;
         if (overpayment>0)    
             msg.sender.transfer(overpayment);
             
         emit changeStateEvent(id, newItem.name, newItem.price, newItem.state, newItem.seller, newItem.buyer);
+        
         return id;
     }
     
@@ -93,12 +94,13 @@ contract SupplyChain {
     function buyItem(uint _itemId) checkState(_itemId, State.ForSale) checkValue(items[_itemId].price) public payable {
         uint overpayment;
         uint price_amount; 
-        
-        overpayment = msg.value - items[_itemId].price;
+      
         price_amount = items[_itemId].price;
         items[_itemId].state = State.Sold;
         items[_itemId].buyer = msg.sender;
         items[_itemId].seller.transfer(price_amount);
+
+        overpayment = msg.value - items[_itemId].price;
         if (overpayment>0) 
             msg.sender.transfer(overpayment);
         
@@ -108,12 +110,14 @@ contract SupplyChain {
   // Create a function named 'shipItem' that allows the seller of a specific Item to record that it has been shipped.
     function shipItem(uint _itemId) checkState(_itemId, State.Sold) checkCaller(items[_itemId].seller) public {
         items[_itemId].state = State.Shipped;
+
         emit changeStateEvent(_itemId, items[_itemId].name, items[_itemId].price, items[_itemId].state, items[_itemId].seller, items[_itemId].buyer);
     }
     
   // Create a function named 'receiveItem' that allows the buyer of a specific Item to record that it has been received.
     function receiveItem(uint _itemId) checkState(_itemId, State.Shipped) checkCaller(items[_itemId].buyer) public {
         items[_itemId].state = State.Received;
+
         emit changeStateEvent(_itemId, items[_itemId].name, items[_itemId].price, items[_itemId].state, items[_itemId].seller, items[_itemId].buyer);
     }
 
